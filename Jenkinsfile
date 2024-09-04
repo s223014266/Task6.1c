@@ -22,13 +22,6 @@ pipeline {
                 echo "Running integration tests using TestNG"
                 // Commands for running tests, e.g., `sh 'mvn test'`
             }
-            post {
-                success {
-                    mail to: "anushka7k@gmail.com",
-                         subject: "test status email",
-                         body: "Test is completed"
-                }
-            }
         }
 
         stage('Code Analysis') {
@@ -50,13 +43,6 @@ pipeline {
                 echo "Deploying the application to ${env.TESTING_ENVIRONMENT} environment"
                 // Command to deploy to staging, e.g., `sh 'aws deploy ...'`
             }
-            post {
-                success {
-                    mail to: "anushka7k@gmail.com",
-                         subject: "security scan stage ${currentBuild.result}",
-                         body: "security scan completed"
-                }
-            }
         }
 
         stage('Integration Tests on Staging') {
@@ -77,17 +63,17 @@ pipeline {
     post {
         success {
             emailext (
-                to: 'anushka7k@gmail.com',
                 subject: "Jenkins Build Success: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
                 body: "Build succeeded! Check the logs for details.",
+                to: 'anushka7k@gmail.com',
                 attachLog: true
             )
         }
         failure {
             emailext (
-                to: 'anushka7k@gmail.com',
                 subject: "Jenkins Build Failure: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
                 body: "Build failed. Check the logs for more details.",
+                to: 'anushka7k@gmail.com',
                 attachLog: true
             )
         }
