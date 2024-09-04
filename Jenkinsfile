@@ -1,83 +1,88 @@
 pipeline {
     agent any
 
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
+    environment {
+        DIRECTORY_PATH = "${env.WORKSPACE}"
+        TESTING_ENVIRONMENT = 'staging'
+        PRODUCTION_ENVIRONMENT = 'Anushka'
+    }
 
+    stages {
         stage('Build') {
             steps {
-                echo 'Fetching the source code'
-                echo 'Compiling the code and generating necessary artifacts'
+                echo "Fetching the source code from ${env.DIRECTORY_PATH}"
+                echo "Compiling the code and generating necessary artifacts"
+                // Actual build commands would go here, e.g., `sh 'mvn clean install'`
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
-                echo 'Running unit tests using JUnit'
-                echo 'Running integration tests using TestNG'
+                echo "Running unit tests using JUnit"
+                echo "Running integration tests using TestNG"
+                // Commands for running tests, e.g., `sh 'mvn test'`
             }
         }
 
         stage('Code Analysis') {
-            when {
-                expression { currentBuild.resultIsBetterOrEqualTo('UNSTABLE') }
-            }
             steps {
-                echo 'Running static code analysis'
+                echo "Analyzing code quality using SonarQube"
+                // Command to run SonarQube analysis, e.g., `sh 'sonar-scanner'`
             }
         }
 
         stage('Security Scan') {
-            when {
-                expression { currentBuild.resultIsBetterOrEqualTo('UNSTABLE') }
-            }
             steps {
-                echo 'Running security scans'
+                echo "Performing a security scan using OWASP ZAP"
+                // Command to run security scan, e.g., `sh 'zap-cli start'`
             }
         }
 
         stage('Deploy to Staging') {
-            when {
-                expression { currentBuild.resultIsBetterOrEqualTo('UNSTABLE') }
-            }
             steps {
-                echo 'Deploying to staging environment'
+                echo "Deploying the application to ${env.TESTING_ENVIRONMENT} environment"
+                // Command to deploy to staging, e.g., `sh 'aws deploy ...'`
+            }
+            post {
+                success{
+                    mail to: "anushka7k@gmail.com",
+                    subject: "security scan stage${currentBuild.result}",
+                    body: "security scan completed"
+                }
             }
         }
 
         stage('Integration Tests on Staging') {
-            when {
-                expression { currentBuild.resultIsBetterOrEqualTo('UNSTABLE') }
-            }
             steps {
-                echo 'Running integration tests on staging environment'
+                echo "Running integration tests on the staging environment"
+                // Commands for running tests on staging
             }
         }
 
         stage('Deploy to Production') {
-            when {
-                expression { currentBuild.resultIsBetterOrEqualTo('UNSTABLE') }
-            }
             steps {
-                echo 'Deploying to production environment'
+                echo "Deploying the application to the ${env.PRODUCTION_ENVIRONMENT} environment"
+                // Command to deploy to production, e.g., `sh 'aws deploy ...'`
             }
         }
     }
 
     post {
         success {
-            mail to: 'anushka7k@gmail.com',
-                 subject: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${currentBuild.currentResult})",
-                 body: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' completed successfully."
+            emailext (
+                subject: "Jenkins Build Success: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
+                body: "Build succeeded! Check the logs for details.",
+                mail to: "anushka7k@gmail.com",
+                attachLog: true
+            )
         }
         failure {
-            mail to: 'anushka7k@gmail.com',
-                 subject: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${currentBuild.currentResult})",
-                 body: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' failed. Please check the Jenkins console output."
+            emailext (
+                subject: "Jenkins Build Failure: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
+                body: "Build failed. Check the logs for more details.",
+                to: 'anushka7k@gmail.com',
+                attachLog: true
+            )
         }
     }
 }
