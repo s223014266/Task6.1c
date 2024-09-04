@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DIRECTORY_PATH = '/path/to/your/code'
+        DIRECTORY_PATH = 'DIRECTORY_PATH = '/Users/jishh/.jenkins/workspace/my-task-app-anushka'
         TESTING_ENVIRONMENT = 'staging'
-        PRODUCTION_ENVIRONMENT = 'YourName-Production'
+        PRODUCTION_ENVIRONMENT = 'Anushka'
     }
 
     stages {
