@@ -23,13 +23,13 @@ pipeline {
                 // Commands for running tests, e.g., `sh 'mvn test'`
             }
 
-            /*post{
+            post{
                 success{
                     mail to: "anushka7k@gmail.com",
                     subject: "Test status email",
                     body: "Test passed"
                 }
-            }*/
+            }
         }
 
         stage('Code Analysis') {
@@ -45,13 +45,13 @@ pipeline {
                 // Command to run security scan, e.g., `sh 'zap-cli start'`
             }
 
-            /*post{
+            post{
                 success{
                     mail to: "anushka7k@gmail.com",
                     subject: "security scan stage ${currentBuild.result}",
                     body: "Security scan stage completed"
                 }
-            }*/
+            }
         }
 
         stage('Deploy to Staging') {
@@ -76,7 +76,7 @@ pipeline {
         }
     }
 
-    post {
+    /*post {
         success {
             emailext (
                 subject: "Jenkins Build Success: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
@@ -93,5 +93,5 @@ pipeline {
                 attachLog: true
             )
         }
-    }
+    }*/
 }
