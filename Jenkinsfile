@@ -12,7 +12,6 @@ pipeline {
             steps {
                 echo "Fetching the source code from ${env.DIRECTORY_PATH}"
                 echo "Compiling the code and generating necessary artifacts"
-                // Actual build commands would go here, e.g., `sh 'mvn clean install'`
             }
         }
 
@@ -20,14 +19,25 @@ pipeline {
             steps {
                 echo "Running unit tests using JUnit"
                 echo "Running integration tests using TestNG"
-                // Commands for running tests, e.g., `sh 'mvn test'`
             }
 
             post{
                 success{
-                    mail to: "anushka7k@gmail.com",
-                    subject: "Test status email",
-                    body: "Test passed"
+                    emailext(
+                        to: "anushka7k@gmail.com",
+                        subject: "Unit and Integration Tests Passed: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
+                        body: "Unit and integration tests have passed.",
+                        attachLog: true
+                    )
+                }
+
+                failure {
+                    emailext (
+                        to: "anushka7k@gmail.com",
+                        subject: "Unit and Integration Tests Failed: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
+                        body: "Unit and integration tests have failed. Check the logs for more details.",
+                        attachLog: true
+                    )
                 }
             }
         }
@@ -35,21 +45,31 @@ pipeline {
         stage('Code Analysis') {
             steps {
                 echo "Analyzing code quality using SonarQube"
-                // Command to run SonarQube analysis, e.g., `sh 'sonar-scanner'`
             }
         }
 
         stage('Security Scan') {
             steps {
                 echo "Performing a security scan using OWASP ZAP"
-                // Command to run security scan, e.g., `sh 'zap-cli start'`
             }
 
             post{
-                success{
-                    mail to: "anushka7k@gmail.com",
-                    subject: "security scan stage ${currentBuild.result}",
-                    body: "Security scan stage completed"
+                success {
+                    emailext (
+                        to: "anushka7k@gmail.com",
+                        subject: "Security Scan Completed: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
+                        body: "Security scan completed successfully.",
+                        attachLog: true
+                    )
+                }
+
+                failure {
+                    emailext (
+                        to: "anushka7k@gmail.com",
+                        subject: "Security Scan Failed: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
+                        body: "Security scan failed. Check the logs for details.",
+                        attachLog: true
+                    )
                 }
             }
         }
@@ -57,41 +77,19 @@ pipeline {
         stage('Deploy to Staging') {
             steps {
                 echo "Deploying the application to ${env.TESTING_ENVIRONMENT} environment"
-                // Command to deploy to staging, e.g., `sh 'aws deploy ...'`
             }
         }
 
         stage('Integration Tests on Staging') {
             steps {
                 echo "Running integration tests on the staging environment"
-                // Commands for running tests on staging
             }
         }
 
         stage('Deploy to Production') {
             steps {
                 echo "Deploying the application to the ${env.PRODUCTION_ENVIRONMENT} environment"
-                // Command to deploy to production, e.g., `sh 'aws deploy ...'`
             }
         }
     }
-
-    /*post {
-        success {
-            emailext (
-                subject: "Jenkins Build Success: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
-                body: "Build succeeded! Check the logs for details.",
-                to: 'anushka7k@gmail.com',
-                attachLog: true
-            )
-        }
-        failure {
-            emailext (
-                subject: "Jenkins Build Failure: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
-                body: "Build failed. Check the logs for more details.",
-                to: 'anushka7k@gmail.com',
-                attachLog: true
-            )
-        }
-    }*/
 }
